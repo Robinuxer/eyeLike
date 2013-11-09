@@ -39,9 +39,9 @@ int main( int argc, const char** argv ) {
   if( !face_cascade.load( face_cascade_name ) ){ printf("--(!)Error loading\n"); return -1; };
 
   cv::namedWindow(main_window_name,CV_WINDOW_NORMAL);
-  cv::moveWindow(main_window_name, 400, 100);
+  cvMoveWindow("Capture - Face detection", 400, 100);
   cv::namedWindow(face_window_name,CV_WINDOW_NORMAL);
-  cv::moveWindow(face_window_name, 10, 100);
+  cvMoveWindow("Capture - Face", 10, 100);
   // cv::namedWindow("Right Eye",CV_WINDOW_NORMAL);
   // cv::moveWindow("Right Eye", 10, 600);
   // cv::namedWindow("Left Eye",CV_WINDOW_NORMAL);
@@ -146,6 +146,7 @@ void findEyes(cv::Mat frame_gray, cv::Rect face) {
   rightPupil.y += face.y;
   leftPupil.x += face.x;
   leftPupil.y += face.y;
+
   // draw eye centers
   // circle(debugImage, rightPupil, 3, 1234);
   cv::Point rightPupilXStart(rightPupil.x-3,rightPupil.y);
