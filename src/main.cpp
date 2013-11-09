@@ -20,7 +20,7 @@ void detectAndDisplay( cv::Mat frame );
 
 /** Global variables */
 //-- Note, either copy these two files from opencv/data/haarscascades to your current folder, or change these locations
-cv::String face_cascade_name = "../../../res/haarcascade_frontalface_alt.xml";
+cv::String face_cascade_name = "haarcascade_frontalface_alt.xml";
 cv::CascadeClassifier face_cascade;
 std::string main_window_name = "Capture - Face detection";
 std::string face_window_name = "Capture - Face";
@@ -140,6 +140,23 @@ void findEyes(cv::Mat frame_gray, cv::Rect face) {
   // draw eye centers
   circle(debugFace, rightPupil, 3, 1234);
   circle(debugFace, leftPupil, 3, 1234);
+
+  // change eye centers to webcam coordinates
+  rightPupil.x += face.x;
+  rightPupil.y += face.y;
+  leftPupil.x += face.x;
+  leftPupil.y += face.y;
+  // draw eye centers
+  circle(debugImage, rightPupil, 3, 1234);
+  circle(debugImage, leftPupil, 3, 1234);
+
+  //-- Draw Eye Region
+  rightEyeRegion.x += face.x;
+  rightEyeRegion.y += face.y;
+  leftEyeRegion.x += face.x;
+  leftEyeRegion.y += face.y;
+  rectangle(debugImage,rightEyeRegion,1234);
+  rectangle(debugImage,leftEyeRegion,1234);
 
   //-- Find Eye Corners
   if (kEnableEyeCorner) {
