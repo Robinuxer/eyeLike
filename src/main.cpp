@@ -163,6 +163,9 @@ void findEyes(cv::Mat frame_gray, cv::Rect face) {
   line(debugImage, leftPupilXStart,leftPupilXEnd , CV_RGB(0,255,0));
   line(debugImage, leftPupilYStart,leftPupilYEnd , CV_RGB(0,255,0));
 
+  printf("Left  Pupil :(%i,%i)  | ",leftPupil.x,leftPupil.y);
+  printf("Right Pupil :(%i,%i)\n",rightPupil.x,rightPupil.y);
+
   //-- Draw Eye Region
   rightEyeRegion.x += face.x;
   rightEyeRegion.y += face.y;
@@ -235,7 +238,7 @@ void detectAndDisplay( cv::Mat frame ) {
   //cv::pow(frame_gray, CV_64F, frame_gray);
   //-- Detect faces
   face_cascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE|CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(150, 150) );
-//  findSkin(debugImage);
+  //  findSkin(debugImage);
 
   for( int i = 0; i < faces.size(); i++ )
   {
