@@ -20,7 +20,7 @@ void detectAndDisplay( cv::Mat frame );
 
 /** Global variables */
 //-- Note, either copy these two files from opencv/data/haarscascades to your current folder, or change these locations
-cv::String face_cascade_name = "../../../res/haarcascade_frontalface_alt.xml";
+cv::String face_cascade_name = "haarcascade_frontalface_alt.xml";
 cv::CascadeClassifier face_cascade;
 std::string main_window_name = "Capture - Face detection";
 std::string face_window_name = "Capture - Face";
@@ -39,17 +39,17 @@ int main( int argc, const char** argv ) {
   if( !face_cascade.load( face_cascade_name ) ){ printf("--(!)Error loading\n"); return -1; };
 
   cv::namedWindow(main_window_name,CV_WINDOW_NORMAL);
-  cv::moveWindow(main_window_name, 400, 100);
+  cvMoveWindow("Capture - Face detection", 400, 100);
   cv::namedWindow(face_window_name,CV_WINDOW_NORMAL);
-  cv::moveWindow(face_window_name, 10, 100);
-  cv::namedWindow("Right Eye",CV_WINDOW_NORMAL);
-  cv::moveWindow("Right Eye", 10, 600);
-  cv::namedWindow("Left Eye",CV_WINDOW_NORMAL);
-  cv::moveWindow("Left Eye", 10, 800);
-  cv::namedWindow("aa",CV_WINDOW_NORMAL);
-  cv::moveWindow("aa", 10, 800);
-  cv::namedWindow("aaa",CV_WINDOW_NORMAL);
-  cv::moveWindow("aaa", 10, 800);
+  cvMoveWindow("Capture - Face", 10, 100);
+  // cv::namedWindow("Right Eye",CV_WINDOW_NORMAL);
+  // cv::moveWindow("Right Eye", 10, 600);
+  // cv::namedWindow("Left Eye",CV_WINDOW_NORMAL);
+  // cv::moveWindow("Left Eye", 10, 800);
+  // cv::namedWindow("aa",CV_WINDOW_NORMAL);
+  // cv::moveWindow("aa", 10, 800);
+  // cv::namedWindow("aaa",CV_WINDOW_NORMAL);
+  // cv::moveWindow("aaa", 10, 800);
 
   createCornerKernels();
   ellipse(skinCrCbHist, cv::Point(113, 155.6), cv::Size(23.4, 15.2),
@@ -141,6 +141,39 @@ void findEyes(cv::Mat frame_gray, cv::Rect face) {
   circle(debugFace, rightPupil, 3, 1234);
   circle(debugFace, leftPupil, 3, 1234);
 
+  // change eye centers to webcam coordinates
+  rightPupil.x += face.x;
+  rightPupil.y += face.y;
+  leftPupil.x += face.x;
+  leftPupil.y += face.y;
+
+  // draw eye centers
+  // circle(debugImage, rightPupil, 3, 1234);
+  cv::Point rightPupilXStart(rightPupil.x-3,rightPupil.y);
+  cv::Point rightPupilXEnd(rightPupil.x+3,rightPupil.y);
+  cv::Point rightPupilYStart(rightPupil.x,rightPupil.y-3);
+  cv::Point rightPupilYEnd(rightPupil.x,rightPupil.y+3);
+  line(debugImage, rightPupilXStart,rightPupilXEnd , CV_RGB(0,255,0));
+  line(debugImage, rightPupilYStart,rightPupilYEnd , CV_RGB(0,255,0));
+  // circle(debugImage, leftPupil, 3, 1234);
+  cv::Point leftPupilXStart(leftPupil.x-2, leftPupil.y);
+  cv::Point leftPupilXEnd(leftPupil.x+2, leftPupil.y);
+  cv::Point leftPupilYStart(leftPupil.x, leftPupil.y-2);
+  cv::Point leftPupilYEnd(leftPupil.x, leftPupil.y+2);
+  line(debugImage, leftPupilXStart,leftPupilXEnd , CV_RGB(0,255,0));
+  line(debugImage, leftPupilYStart,leftPupilYEnd , CV_RGB(0,255,0));
+
+  printf("Left  Pupil :(%i,%i)  | ",leftPupil.x,leftPupil.y);
+  printf("Right Pupil :(%i,%i)\n",rightPupil.x,rightPupil.y);
+
+  //-- Draw Eye Region
+  rightEyeRegion.x += face.x;
+  rightEyeRegion.y += face.y;
+  leftEyeRegion.x += face.x;
+  leftEyeRegion.y += face.y;
+  rectangle(debugImage,rightEyeRegion,CV_RGB(0,255,0));
+  rectangle(debugImage,leftEyeRegion,CV_RGB(0,255,0));
+
   //-- Find Eye Corners
   if (kEnableEyeCorner) {
     cv::Point2f leftRightCorner = findEyeCorner(faceROI(leftRightCornerRegion), true, false);
@@ -205,11 +238,11 @@ void detectAndDisplay( cv::Mat frame ) {
   //cv::pow(frame_gray, CV_64F, frame_gray);
   //-- Detect faces
   face_cascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE|CV_HAAR_FIND_BIGGEST_OBJECT, cv::Size(150, 150) );
-//  findSkin(debugImage);
+  //  findSkin(debugImage);
 
   for( int i = 0; i < faces.size(); i++ )
   {
-    rectangle(debugImage, faces[i], 1234);
+    // rectangle(debugImage, faces[i], 1234);
   }
   //-- Show what you got
   if (faces.size() > 0) {
