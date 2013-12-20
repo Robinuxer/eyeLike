@@ -163,8 +163,8 @@ void findEyes(cv::Mat frame_gray, cv::Rect face) {
   line(debugImage, leftPupilXStart,leftPupilXEnd , CV_RGB(0,255,0));
   line(debugImage, leftPupilYStart,leftPupilYEnd , CV_RGB(0,255,0));
 
-  printf("Left  Pupil :(%i,%i)  | ",leftPupil.x,leftPupil.y);
-  printf("Right Pupil :(%i,%i)\n",rightPupil.x,rightPupil.y);
+  // printf("Left  Pupil :(%i,%i)  | ",leftPupil.x,leftPupil.y);
+  // printf("Right Pupil :(%i,%i)\n",rightPupil.x,rightPupil.y);
 
   //-- Draw Eye Region
   rightEyeRegion.x += face.x;
@@ -192,6 +192,16 @@ void findEyes(cv::Mat frame_gray, cv::Rect face) {
     circle(faceROI, leftLeftCorner, 3, 200);
     circle(faceROI, rightLeftCorner, 3, 200);
     circle(faceROI, rightRightCorner, 3, 200);
+
+    // Change eye corner point to webcam coordinates 
+    leftLeftCorner.x += face.x;
+    leftLeftCorner.y += face.y;
+    rightRightCorner.x += face.x;
+    rightRightCorner.y += face.y;
+
+    // draw circle in webcam image
+    circle(debugImage, leftLeftCorner, 2, CV_RGB(0,255,0));
+    circle(debugImage, rightRightCorner, 2, CV_RGB(0,255,0));
   }
 
   imshow(face_window_name, faceROI);
