@@ -44,10 +44,10 @@ cv::Mat eyeCornerMap(const cv::Mat &region, bool left, bool left2) {
 
   cv::Mat miRegion(region, rowRange, colRange);
 
-  cv::filter2D(miRegion, cornerMap, CV_32F,
-               (left && !left2) || (!left && !left2) ? *leftCornerKernel : *rightCornerKernel);
+  cv::filter2D(miRegion, cornerMap, CV_32F, (left && !left2) || (!left && !left2) ? *leftCornerKernel : *rightCornerKernel);
 
   return cornerMap;
+  // return miRegion;
 }
 
 cv::Point2f findEyeCorner(cv::Mat region, bool left, bool left2) {

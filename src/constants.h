@@ -10,6 +10,11 @@ const int kEyePercentSide = 13;
 const int kEyePercentHeight = 30;
 const int kEyePercentWidth = 35;
 
+//smoothen const
+const int QLEN= 5;
+const int THRESHOLD= 18;
+const int STARTDIFF= 45;
+
 // Preprocessing
 const bool kSmoothFaceImage = false;
 const float kSmoothFaceFactor = 0.005;

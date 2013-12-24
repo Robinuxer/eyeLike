@@ -17,6 +17,7 @@
 
 /** Function Headers */
 void detectAndDisplay( cv::Mat frame );
+void smoothen(cv::Point *left,cv::Point *right);
 
 /** Global variables */
 //-- Note, either copy these two files from opencv/data/haarscascades to your current folder, or change these locations
@@ -27,6 +28,11 @@ std::string face_window_name = "Capture - Face";
 cv::RNG rng(12345);
 cv::Mat debugImage;
 cv::Mat skinCrCbHist = cv::Mat::zeros(cv::Size(256, 256), CV_8UC1);
+
+//PupilQueue 
+cv::Point leftPupilQueue[QLEN];
+cv::Point rightPupilQueue[QLEN];
+int quePointer=0;
 
 /**
  * @function main
@@ -109,6 +115,9 @@ void findEyes(cv::Mat frame_gray, cv::Rect face) {
   //-- Find Eye Centers
   cv::Point leftPupil = findEyeCenter(faceROI,leftEyeRegion,"Left Eye");
   cv::Point rightPupil = findEyeCenter(faceROI,rightEyeRegion,"Right Eye");
+
+  smoothen(&leftPupil,&rightPupil);
+
   // get corner regions
   cv::Rect leftRightCornerRegion(leftEyeRegion);
   leftRightCornerRegion.width -= leftPupil.x;
@@ -128,10 +137,10 @@ void findEyes(cv::Mat frame_gray, cv::Rect face) {
   rightRightCornerRegion.x += rightPupil.x;
   rightRightCornerRegion.height /= 2;
   rightRightCornerRegion.y += rightRightCornerRegion.height / 2;
-  rectangle(debugFace,leftRightCornerRegion,200);
-  rectangle(debugFace,leftLeftCornerRegion,200);
-  rectangle(debugFace,rightLeftCornerRegion,200);
-  rectangle(debugFace,rightRightCornerRegion,200);
+  // rectangle(debugFace,leftRightCornerRegion,200);
+  // rectangle(debugFace,leftLeftCornerRegion,200);
+  // rectangle(debugFace,rightLeftCornerRegion,200);
+  // rectangle(debugFace,rightRightCornerRegion,200);
   // change eye centers to face coordinates
   rightPupil.x += rightEyeRegion.x;
   rightPupil.y += rightEyeRegion.y;
@@ -163,8 +172,6 @@ void findEyes(cv::Mat frame_gray, cv::Rect face) {
   line(debugImage, leftPupilXStart,leftPupilXEnd , CV_RGB(0,255,0));
   line(debugImage, leftPupilYStart,leftPupilYEnd , CV_RGB(0,255,0));
 
-  // printf("Left  Pupil :(%i,%i)  | ",leftPupil.x,leftPupil.y);
-  // printf("Right Pupil :(%i,%i)\n",rightPupil.x,rightPupil.y);
 
   //-- Draw Eye Region
   rightEyeRegion.x += face.x;
@@ -175,34 +182,32 @@ void findEyes(cv::Mat frame_gray, cv::Rect face) {
   rectangle(debugImage,leftEyeRegion,CV_RGB(0,255,0));
 
   //-- Find Eye Corners
-  if (kEnableEyeCorner) {
-    cv::Point2f leftRightCorner = findEyeCorner(faceROI(leftRightCornerRegion), true, false);
-    leftRightCorner.x += leftRightCornerRegion.x;
-    leftRightCorner.y += leftRightCornerRegion.y;
-    cv::Point2f leftLeftCorner = findEyeCorner(faceROI(leftLeftCornerRegion), true, true);
-    leftLeftCorner.x += leftLeftCornerRegion.x;
-    leftLeftCorner.y += leftLeftCornerRegion.y;
-    cv::Point2f rightLeftCorner = findEyeCorner(faceROI(rightLeftCornerRegion), false, true);
-    rightLeftCorner.x += rightLeftCornerRegion.x;
-    rightLeftCorner.y += rightLeftCornerRegion.y;
-    cv::Point2f rightRightCorner = findEyeCorner(faceROI(rightRightCornerRegion), false, false);
-    rightRightCorner.x += rightRightCornerRegion.x;
-    rightRightCorner.y += rightRightCornerRegion.y;
-    circle(faceROI, leftRightCorner, 3, 200);
-    circle(faceROI, leftLeftCorner, 3, 200);
-    circle(faceROI, rightLeftCorner, 3, 200);
-    circle(faceROI, rightRightCorner, 3, 200);
+  cv::Point2f leftRightCorner = findEyeCorner(faceROI(leftRightCornerRegion), true, false);
+  leftRightCorner.x += leftRightCornerRegion.x;
+  leftRightCorner.y += leftRightCornerRegion.y;
+  cv::Point2f leftLeftCorner = findEyeCorner(faceROI(leftLeftCornerRegion), true, true);
+  leftLeftCorner.x += leftLeftCornerRegion.x;
+  leftLeftCorner.y += leftLeftCornerRegion.y;
+  cv::Point2f rightLeftCorner = findEyeCorner(faceROI(rightLeftCornerRegion), false, true);
+  rightLeftCorner.x += rightLeftCornerRegion.x;
+  rightLeftCorner.y += rightLeftCornerRegion.y;
+  cv::Point2f rightRightCorner = findEyeCorner(faceROI(rightRightCornerRegion), false, false);
+  rightRightCorner.x += rightRightCornerRegion.x;
+  rightRightCorner.y += rightRightCornerRegion.y;
+  // circle(faceROI, leftRightCorner, 3, 200);
+  circle(faceROI, leftLeftCorner, 3, 200);
+  circle(faceROI, rightLeftCorner, 3, 200);
+  // circle(faceROI, rightRightCorner, 3, 200);
 
-    // Change eye corner point to webcam coordinates 
-    leftLeftCorner.x += face.x;
-    leftLeftCorner.y += face.y;
-    rightRightCorner.x += face.x;
-    rightRightCorner.y += face.y;
+  // Change eye corner point to webcam coordinates 
+  leftLeftCorner.x += face.x;
+  leftLeftCorner.y += face.y;
+  rightRightCorner.x += face.x;
+  rightRightCorner.y += face.y;
 
-    // draw circle in webcam image
-    circle(debugImage, leftLeftCorner, 2, CV_RGB(0,255,0));
-    circle(debugImage, rightRightCorner, 2, CV_RGB(0,255,0));
-  }
+  // draw circle in webcam image
+  circle(debugImage, leftLeftCorner, 2, CV_RGB(0,255,0));
+  circle(debugImage, rightRightCorner, 2, CV_RGB(0,255,0));
 
   imshow(face_window_name, faceROI);
 //  cv::Rect roi( cv::Point( 0, 0 ), faceROI.size());
@@ -258,4 +263,59 @@ void detectAndDisplay( cv::Mat frame ) {
   if (faces.size() > 0) {
     findEyes(frame_gray, faces[0]);
   }
+}
+
+bool startThreshold = false;
+
+void smoothen(cv::Point *left,cv::Point *right){
+  int pre  = (quePointer-1)%QLEN;
+  int next = (quePointer+1)%QLEN;
+
+  leftPupilQueue[quePointer] = *left;
+  rightPupilQueue[quePointer] = *right;
+  quePointer = next;
+
+  // calculate AVG point of QLEN
+
+  int leftXavg,leftYavg, rightXavg,rightYavg;
+  leftXavg = left->x;
+  leftYavg = left->y;
+  rightXavg = right->x;
+  rightYavg = right->y;
+
+  for(int i=0;i<QLEN;i++){
+    leftXavg += leftPupilQueue[i].x;
+    leftYavg += leftPupilQueue[i].y;
+    rightXavg += rightPupilQueue[i].x;
+    rightYavg += rightPupilQueue[i].y;
+  }
+  leftXavg = leftXavg / (QLEN+1);
+  leftYavg = leftYavg / (QLEN+1);
+  rightXavg = rightXavg / (QLEN+1);
+  rightYavg = rightYavg / (QLEN+1);
+
+  //Threshold switch
+  if (quePointer == 0) {
+    startThreshold = false;
+    for (int i=0;i<QLEN;i++){
+      if (abs(leftPupilQueue[i].y  - leftYavg)  > STARTDIFF ) break;
+      if (abs(rightPupilQueue[i].y - rightYavg) > STARTDIFF ) break;
+      if (i==QLEN-1) startThreshold = true;
+    }
+  }
+
+  if (startThreshold){
+    if (abs(left->y - leftYavg) > THRESHOLD ){
+      left->y = leftPupilQueue[pre].y; 
+      leftPupilQueue[pre+1].y = leftPupilQueue[pre].y;
+    }
+    if (abs(right->y - rightYavg) > THRESHOLD ){
+      right->y = rightPupilQueue[pre].y;
+      rightPupilQueue[pre+1].y = rightPupilQueue[pre].y;
+    }
+  }
+
+  // printf("Left  Pupil :(%i,%i)  | ",left->x,left->y);
+  printf("Right Pupil :(%i,%i) AVG: %i %i\n",right->x,right->y,rightYavg,startThreshold);
+
 }
